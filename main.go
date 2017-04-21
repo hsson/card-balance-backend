@@ -5,10 +5,10 @@
 
 package main
 
-import (
-	"fmt"
-)
+import "net/http"
 
 func main() {
-	fmt.Println("Hello world!")
+	r := NewRouter()
+	http.Handle("/", r)
+	http.ListenAndServe(":8080", nil)
 }
