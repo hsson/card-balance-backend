@@ -22,7 +22,7 @@ type route struct {
 
 var routes = []route{
 	// Balance module
-	route{"GetBalance", "GET", "/balance/{number:[0-9]+}", balance.GetBalance},
+	route{"GetBalance", "GET", "/balance/{number:[0-9]{16}}", balance.GetBalance},
 	// Food menu module
 	route{"IndexMenu", "GET", "/menu", menu.Index},
 	// Card charging redirect
