@@ -6,10 +6,11 @@
 package charge
 
 import "net/http"
-import "fmt"
 
-// Redirect redirects to the proper website for
-// charging a card
+// TODO: Move to config file
+const chargingWebsiteURL = "https://kortladdning3.chalmerskonferens.se/"
+
+// Redirect redirects to the proper website for charging a card
 func Redirect(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Should redirect to the proper website")
+	http.Redirect(w, r, chargingWebsiteURL, http.StatusTemporaryRedirect)
 }
