@@ -5,13 +5,36 @@
 
 package balance
 
-import "net/http"
-import "fmt"
-import "github.com/gorilla/mux"
+import (
+	"encoding/json"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
+)
+
+const allowedCardNumberLength = 16
+
+// Data represents the balance data available from the card website
+type Data struct {
+	CardNumber string  `json:"card_number"`
+	FullName   string  `json:"full_name"`
+	Email      string  `json:"email"`
+	Balance    float64 `json:"balance"`
+}
 
 // GetBalance returns the card balance for the card with the
 // specified card number
 func GetBalance(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	fmt.Fprintf(w, "Get balance for number %v\n", vars["number"])
+	cardNumber := vars["number"]
+	data, err := getCardData(cardNumber)
+	if err != nil {
+		// TODO: Proper error handling
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	encoder := json.NewEncoder(w)
+	encoder.Encode(data)
 }
