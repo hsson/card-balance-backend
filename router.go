@@ -9,9 +9,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// NewRouter creates a router that handles the routes
+// newRouter creates a router that handles the routes
 // specified in the routes.go file
-func NewRouter() *mux.Router {
+func newRouter() *mux.Router {
 	router := mux.NewRouter()
 	router.StrictSlash(true)
 	for _, route := range routes {

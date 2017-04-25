@@ -97,7 +97,7 @@ func getCardData(number string) (Data, error) {
 	}
 	headers := make(map[string]string)
 	headers[headerCookie] = cookie
-	headers["Accept-Charset"] = "UTF-8"
+	headers["Accept-Charset"] = "UTF-8" // TODO: Make constant
 	detailsPage, err := getPage(netClient, baseURL+"/"+infoPage, headers)
 	if err != nil {
 		return Data{}, err

@@ -8,7 +8,7 @@ package main
 import "net/http"
 
 func main() {
-	r := NewRouter()
+	r := newRouter()
 	http.Handle("/", r)
 	http.ListenAndServe(":8080", nil)
 }
