@@ -17,42 +17,13 @@ import (
 	"time"
 )
 
-const (
-	baseURL   = "https://kortladdning3.chalmerskonferens.se"
-	loginPage = "Default.aspx"
-	infoPage  = "CardLoad_Order.aspx"
-
-	viewStateKey       = "__VIEWSTATE"
-	viewStateGenKey    = "__VIEWSTATEGENERATOR"
-	eventValidationKey = "__EVENTVALIDATION"
-	cardNumberKey      = "txtCardNumber"
-	savedNumberKey     = "SavedCardNumber"
-	nextButtonKey      = "btnNext"
-	nextButtonValue    = "Nästa"
-	mobileKey          = "hiddenIsMobile"
-	mobileValue        = "desktop"
-
-	headerContentType      = "Content-Type"
-	headerContentTypeValue = "application/x-www-form-urlencoded"
-	headerCookie           = "Cookie"
-	headerCookieValue      = "cookieconsent_dismissed=yes"
-	headerSetCookie        = "Set-Cookie"
-
-	viewStatePattern       = "(?:__VIEWSTATE\" value=\")(.*?)(?:\")"
-	viewStateGenPattern    = "(?:__VIEWSTATEGENERATOR\" value=\")(.*?)(?:\")"
-	eventValidationPattern = "(?:__EVENTVALIDATION\" value=\")(.*?)(?:\")"
-
-	cardValuePattern  = "(?:txtPTMCardValue\\\">)(.*?)(?:<\\/span>)"
-	cardNamePattern   = "(?:txtPTMCardName\\\">)(.*?)(?:<\\/span>)"
-	cardEmailPattern  = "(?:lblEmail\\\">)(.*?)(?:<\\/span>)"
-	cardNumberPattern = "(?:txtPTMCardNumber\\\">)(.*?)(?:<\\/span>)"
-)
-
 var (
+	// Regex foŕ the login form
 	viewStateRegexp       = regexp.MustCompile(viewStatePattern)
 	viewStateGenRegexp    = regexp.MustCompile(viewStateGenPattern)
 	eventValidationRegexp = regexp.MustCompile(eventValidationPattern)
 
+	// Regex for extracting card data
 	cardValueRegexp  = regexp.MustCompile(cardValuePattern)
 	cardNameRegexp   = regexp.MustCompile(cardNamePattern)
 	cardEmailRegexp  = regexp.MustCompile(cardEmailPattern)
@@ -97,7 +68,7 @@ func getCardData(number string) (Data, error) {
 	}
 	headers := make(map[string]string)
 	headers[headerCookie] = cookie
-	headers["Accept-Charset"] = "UTF-8" // TODO: Make constant
+	headers[headerAcceptCharset] = headerAcceptCharsetValue
 	detailsPage, err := getPage(netClient, baseURL+"/"+infoPage, headers)
 	if err != nil {
 		return Data{}, err
@@ -175,7 +146,7 @@ func getSessionCookie(client *http.Client,
 	formValues.Add(nextButtonKey, nextButtonValue)
 	formValues.Add(mobileKey, mobileValue)
 
-	req, err := http.NewRequest("POST", baseURL+"/"+loginPage, strings.NewReader(formValues.Encode()))
+	req, err := http.NewRequest(http.MethodPost, baseURL+"/"+loginPage, strings.NewReader(formValues.Encode()))
 	if err != nil {
 		return "", err
 	}
