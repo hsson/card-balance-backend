@@ -1,7 +1,6 @@
 package balance
 
 import "testing"
-import "regexp"
 
 const exampleLoginPage = `
 <!DOCTYPE html>
@@ -272,50 +271,56 @@ const exampleCardDetailsPage = `
 </html>
 `
 
-func regexpTestHelper(input, expected, key string, reg *regexp.Regexp, t *testing.T) {
-	if val := extractData(input, reg); val != expected {
-		t.Errorf("Wrong %v, got %v", key, val)
+func simpleComparisonTest(t *testing.T, in, exp interface{}) {
+	if in != exp {
+		t.Errorf("Unexpected value, got %v", in)
 	}
 }
 
-func TestExtractViewState(t *testing.T) {
-	correctViewState := "/wEPDwUKMTEzNTI2MjQyMg9kFgQCAw9kFgoCAQ9kFgICAQ8PFgIeBFRleHQFClBUTSBLb5J0bnJkZAICDxYCHgdWaXNpYmxlaGQCAkadl88BaGQCBA8WAh8BIdjwaQ8WAh8BaBYCAgEPEGRkFgBkAgUPDxYCHwAFCShkZXNrdG9wKWRkZMD6W4zuUf8/+Dp04d7fIVjURaNB"
+func TestExtractFormTokens(t *testing.T) {
+	testScraper := new(scraper)
+	err := testScraper.updateTokens(exampleLoginPage)
+	if err != nil {
+		t.Errorf("Got unexpected error: %v", err.Error())
+	}
+	t.Run("ViewState", func(t *testing.T) {
+		correctViewState := "/wEPDwUKMTEzNTI2MjQyMg9kFgQCAw9kFgoCAQ9kFgICAQ8PFgIeBFRleHQFClBUTSBLb5J0bnJkZAICDxYCHgdWaXNpYmxlaGQCAkadl88BaGQCBA8WAh8BIdjwaQ8WAh8BaBYCAgEPEGRkFgBkAgUPDxYCHwAFCShkZXNrdG9wKWRkZMD6W4zuUf8/+Dp04d7fIVjURaNB"
+		simpleComparisonTest(t, testScraper.viewState, correctViewState)
+	})
 
-	regexpTestHelper(exampleLoginPage, correctViewState, "ViewState", viewStateRegexp, t)
+	t.Run("ViewStateGenerator", func(t *testing.T) {
+		correctViewStateGen := "CX0A0534"
+		simpleComparisonTest(t, testScraper.viewStateGen, correctViewStateGen)
+	})
+
+	t.Run("EventValidation", func(t *testing.T) {
+		correctEventValidation := "/wEWBAKNp6aXDwLi0uqnCgKF59rWBAK94jAbChDpRor7Q17FkzZGQUmFZy1hHJ2a"
+		simpleComparisonTest(t, testScraper.eventValidation, correctEventValidation)
+	})
 }
 
-func TestExtractViewStateGen(t *testing.T) {
-	correctViewStateGen := "CX0A0534"
+func TestExtractCardData(t *testing.T) {
+	data, err := parseData(exampleCardDetailsPage)
+	if err != nil {
+		t.Errorf("Got unexpected error: %v", err.Error())
+	}
+	t.Run("CardName", func(t *testing.T) {
+		name := "John Doe"
+		simpleComparisonTest(t, data.FullName, name)
+	})
 
-	regexpTestHelper(exampleLoginPage, correctViewStateGen, "ViewStateGenerator", viewStateGenRegexp, t)
-}
+	t.Run("CardEmail", func(t *testing.T) {
+		email := "john@example.com"
+		simpleComparisonTest(t, data.Email, email)
+	})
 
-func TestExtractEventValidation(t *testing.T) {
-	correctEventValidation := "/wEWBAKNp6aXDwLi0uqnCgKF59rWBAK94jAbChDpRor7Q17FkzZGQUmFZy1hHJ2a"
+	t.Run("CardNumber", func(t *testing.T) {
+		number := "2222333344445555"
+		simpleComparisonTest(t, data.CardNumber, number)
+	})
 
-	regexpTestHelper(exampleLoginPage, correctEventValidation, "EventValidation", eventValidationRegexp, t)
-}
-
-func TestExtractCardName(t *testing.T) {
-	correctName := "John Doe"
-
-	regexpTestHelper(exampleCardDetailsPage, correctName, "CardName", cardNameRegexp, t)
-}
-
-func TestExtractCardEmail(t *testing.T) {
-	correctEmail := "john@example.com"
-
-	regexpTestHelper(exampleCardDetailsPage, correctEmail, "CardEmail", cardEmailRegexp, t)
-}
-
-func TestExtractCardNumber(t *testing.T) {
-	correctNumber := "2222333344445555"
-
-	regexpTestHelper(exampleCardDetailsPage, correctNumber, "CardNumber", cardNumberRegexp, t)
-}
-
-func TestExtractCardValue(t *testing.T) {
-	correctValue := "69,42"
-
-	regexpTestHelper(exampleCardDetailsPage, correctValue, "CardValue", cardValueRegexp, t)
+	t.Run("CardValue", func(t *testing.T) {
+		balance := 69.42
+		simpleComparisonTest(t, data.Balance, balance)
+	})
 }
