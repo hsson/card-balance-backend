@@ -10,24 +10,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
+	"golang.org/x/net/html"
 )
 
 var (
-	// Regex foŕ the login form
-	viewStateRegexp       = regexp.MustCompile(viewStatePattern)
-	viewStateGenRegexp    = regexp.MustCompile(viewStateGenPattern)
-	eventValidationRegexp = regexp.MustCompile(eventValidationPattern)
-
-	// Regex for extracting card data
-	cardValueRegexp  = regexp.MustCompile(cardValuePattern)
-	cardNameRegexp   = regexp.MustCompile(cardNamePattern)
-	cardEmailRegexp  = regexp.MustCompile(cardEmailPattern)
-	cardNumberRegexp = regexp.MustCompile(cardNumberPattern)
-
 	// ErrorBadPage indicates that the page is not available
 	ErrorBadPage = errors.New("Page not OK")
 	// ErrorNoFormToken means that a required form token is not available
@@ -173,38 +164,44 @@ func (s *scraper) updateTokens() error {
 		return err
 	}
 
-	s.viewState = extractData(page, viewStateRegexp)
-	s.viewStateGen = extractData(page, viewStateGenRegexp)
-	s.eventValidation = extractData(page, eventValidationRegexp)
-	if s.viewState == "" || s.viewStateGen == "" || s.eventValidation == "" {
+	htmlNode, err := html.Parse(strings.NewReader(page))
+	if err != nil {
+		return err
+	}
+	doc := goquery.NewDocumentFromNode(htmlNode)
+
+	viewState, foundViewState :=
+		doc.Find("#" + viewStateKey).First().Attr(valueAttribute)
+	viewStateGen, foundViewStateGen :=
+		doc.Find("#" + viewStateGenKey).First().Attr(valueAttribute)
+	eventValidation, foundEventValidation :=
+		doc.Find("#" + eventValidationKey).First().Attr(valueAttribute)
+
+	if !foundViewState || !foundViewStateGen || !foundEventValidation {
 		return ErrorNoFormToken
 	}
+
+	s.viewState = viewState
+	s.viewStateGen = viewStateGen
+	s.eventValidation = eventValidation
 	return nil
 }
 
 func parseData(page string) (Data, error) {
+	htmlNode, err := html.Parse(strings.NewReader(page))
+	if err != nil {
+		return Data{}, err
+	}
+	doc := goquery.NewDocumentFromNode(htmlNode)
 	data := Data{}
-	// TODO: CHeck so values are not empty
-	valText := extractData(page, cardValueRegexp)
-	name := extractData(page, cardNameRegexp)
-	email := extractData(page, cardEmailRegexp)
-	cardNumber := extractData(page, cardNumberRegexp)
-	value, err := strconv.ParseFloat(strings.Replace(valText, ",", ".", -1), 64)
+	data.CardNumber = doc.Find(cardNumberID).First().Text()
+	data.FullName = doc.Find(cardNameID).First().Text()
+	data.Email = doc.Find(cardEmailID).First().Text()
+	balance := doc.Find(cardValueID).First().Text()
+	value, err := strconv.ParseFloat(strings.Replace(balance, ",", ".", -1), 64)
 	if err != nil {
 		return Data{}, ErrorInvalidBalance
 	}
-
-	data.FullName = name
-	data.Email = email
-	data.CardNumber = cardNumber
 	data.Balance = value
 	return data, nil
-}
-
-func extractData(input string, expression *regexp.Regexp) string {
-	results := expression.FindStringSubmatch(input)
-	if len(results) <= 1 {
-		return ""
-	}
-	return results[1]
 }

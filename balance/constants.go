@@ -31,14 +31,9 @@ const (
 	headerAcceptCharset      = "Accept-Charset"
 	headerAcceptCharsetValue = "UTF-8"
 
-	// Regular expression patterns for login form
-	viewStatePattern       = "(?:__VIEWSTATE\" value=\")(.*?)(?:\")"
-	viewStateGenPattern    = "(?:__VIEWSTATEGENERATOR\" value=\")(.*?)(?:\")"
-	eventValidationPattern = "(?:__EVENTVALIDATION\" value=\")(.*?)(?:\")"
-
-	// Regular expression patterns for extracting card data
-	cardValuePattern  = "(?:txtPTMCardValue\\\">)(.*?)(?:<\\/span>)"
-	cardNamePattern   = "(?:txtPTMCardName\\\">)(.*?)(?:<\\/span>)"
-	cardEmailPattern  = "(?:lblEmail\\\">)(.*?)(?:<\\/span>)"
-	cardNumberPattern = "(?:txtPTMCardNumber\\\">)(.*?)(?:<\\/span>)"
+	cardValueID    = "#txtPTMCardValue"
+	cardNameID     = "#txtPTMCardName"
+	cardEmailID    = "#lblEmail"
+	cardNumberID   = "#txtPTMCardNumber"
+	valueAttribute = "value"
 )
