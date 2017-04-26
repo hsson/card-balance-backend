@@ -7,7 +7,6 @@ package balance
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -39,74 +38,100 @@ var (
 	ErrorInvalidBalance = errors.New("The balance could not be retrieved")
 )
 
-type formTokens struct {
-	viewState          string
-	viewStateGenerator string
-	eventValidation    string
+type scraper struct {
+	cardNumber string
+
+	viewState       string
+	viewStateGen    string
+	eventValidation string
+
+	headers map[string]string
+
+	client *http.Client
 }
 
-func getCardData(number string) (Data, error) {
-	var netClient = &http.Client{
+func (s *scraper) init() {
+	s.cardNumber = ""
+	s.viewState = ""
+	s.viewStateGen = ""
+	s.eventValidation = ""
+	s.headers = nil
+	s.client = &http.Client{
 		Timeout: time.Second * 10,
 	}
+}
 
-	// Request to get the login page, this is needed as
-	// some tokens are required from the login form
-	loginPage, err := getPage(netClient, baseURL+"/"+loginPage, nil)
-	if err != nil {
-		return Data{}, err
-	}
-	// Extract the tokens form the login form
-	tokens, err := getFormTokens(loginPage)
-	if err != nil {
-		return Data{}, err
-	}
-	// Do the login and get a session cookie
-	cookie, err := getSessionCookie(netClient, number, tokens)
-	if err != nil {
-		return Data{}, err
-	}
-	headers := make(map[string]string)
-	headers[headerCookie] = cookie
-	headers[headerAcceptCharset] = headerAcceptCharsetValue
-	detailsPage, err := getPage(netClient, baseURL+"/"+infoPage, headers)
+func (s *scraper) Scrape(number string) (Data, error) {
+	// Initialize scraper for new scrape request
+	s.init()
+	s.cardNumber = number
+
+	// Get tokens from login form
+	err := s.updateTokens()
 	if err != nil {
 		return Data{}, err
 	}
 
-	// TODO: Check so values aren't empty
-	valText := extractData(detailsPage, cardValueRegexp)
-	name := extractData(detailsPage, cardNameRegexp)
-	email := extractData(detailsPage, cardEmailRegexp)
-	cardNumber := extractData(detailsPage, cardNumberRegexp)
-	value, err := strconv.ParseFloat(strings.Replace(valText, ",", ".", -1), 64)
+	// Perform the login
+	err = s.login()
 	if err != nil {
-		return Data{}, ErrorInvalidBalance
+		return Data{}, err
 	}
 
-	data := Data{}
-	data.CardNumber = cardNumber
-	data.FullName = name
-	data.Email = email
-	data.Balance = value
-	fmt.Println(value)
+	// Get the data from the logged in page
+	data, err := s.getData()
 	return data, nil
 }
 
-func getPage(client *http.Client,
-	url string,
-	headers map[string]string) (string, error) {
+func (s *scraper) login() error {
+	// Prepare a request with correct headers and login
+	// form values
+	req, err := s.newLoginRequest()
+	if err != nil {
+		return err
+	}
+	// Make sure to not follow any redirects
+	s.client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+	response, err := s.client.Do(req)
+	if err != nil {
+		return err
+	}
+	// Extract the session cookie from the response
+	cookie := response.Header.Get(headerSetCookie)
+	if cookie == "" {
+		return ErrorNoSessionCookie
+	}
+	s.headers = make(map[string]string)
+	s.headers[headerCookie] = cookie
+	s.headers[headerAcceptCharset] = headerAcceptCharsetValue
+	return nil
+}
 
-	req, err := http.NewRequest("GET", url, nil)
+func (s *scraper) getData() (Data, error) {
+	page, err := s.getWebContent(baseURL + "/" + infoPage)
+	if err != nil {
+		return Data{}, err
+	}
+	data, err := parseData(page)
+	if err != nil {
+		return Data{}, err
+	}
+	return data, nil
+}
+
+func (s *scraper) getWebContent(url string) (string, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return "", err
 	}
-	if headers != nil {
-		for key, value := range headers {
+	if s.headers != nil {
+		for key, value := range s.headers {
 			req.Header.Add(key, value)
 		}
 	}
-	response, err := client.Do(req)
+	response, err := s.client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -121,50 +146,59 @@ func getPage(client *http.Client,
 	return string(body), nil
 }
 
-func getFormTokens(loginPage string) (formTokens, error) {
-	tokens := formTokens{}
-	tokens.viewState = extractData(loginPage, viewStateRegexp)
-	tokens.viewStateGenerator = extractData(loginPage, viewStateGenRegexp)
-	tokens.eventValidation = extractData(loginPage, eventValidationRegexp)
-	if tokens.viewState == "" || tokens.viewStateGenerator == "" || tokens.eventValidation == "" {
-		return tokens, ErrorNoFormToken
-	}
-	return tokens, nil
-}
+func (s *scraper) newLoginRequest() (*http.Request, error) {
+	// Add login form parameters
+	loginForm := url.Values{}
+	loginForm.Add(viewStateKey, s.viewState)
+	loginForm.Add(viewStateGenKey, s.viewStateGen)
+	loginForm.Add(eventValidationKey, s.eventValidation)
+	loginForm.Add(cardNumberKey, s.cardNumber)
+	loginForm.Add(savedNumberKey, "")
+	loginForm.Add(nextButtonKey, nextButtonValue)
+	loginForm.Add(mobileKey, mobileValue)
 
-func getSessionCookie(client *http.Client,
-	cardNumber string,
-	tokens formTokens) (string, error) {
-
-	formValues := url.Values{}
-	// Add form parameters
-	formValues.Add(viewStateKey, tokens.viewState)
-	formValues.Add(viewStateGenKey, tokens.viewStateGenerator)
-	formValues.Add(eventValidationKey, tokens.eventValidation)
-	formValues.Add(cardNumberKey, cardNumber)
-	formValues.Add(savedNumberKey, "")
-	formValues.Add(nextButtonKey, nextButtonValue)
-	formValues.Add(mobileKey, mobileValue)
-
-	req, err := http.NewRequest(http.MethodPost, baseURL+"/"+loginPage, strings.NewReader(formValues.Encode()))
+	// Create an HTTP request with the login parameters
+	req, err := http.NewRequest(http.MethodPost, baseURL+"/"+loginPage, strings.NewReader(loginForm.Encode()))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-
 	req.Header.Add(headerContentType, headerContentTypeValue)
 	req.Header.Add(headerCookie, headerCookieValue)
-	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
-	}
-	response, err := client.Do(req)
+	return req, nil
+}
+
+func (s *scraper) updateTokens() error {
+	page, err := s.getWebContent(baseURL + "/" + loginPage)
 	if err != nil {
-		return "", err
+		return err
 	}
-	cookie := response.Header.Get(headerSetCookie)
-	if cookie == "" {
-		return "", ErrorNoSessionCookie
+
+	s.viewState = extractData(page, viewStateRegexp)
+	s.viewStateGen = extractData(page, viewStateGenRegexp)
+	s.eventValidation = extractData(page, eventValidationRegexp)
+	if s.viewState == "" || s.viewStateGen == "" || s.eventValidation == "" {
+		return ErrorNoFormToken
 	}
-	return cookie, nil
+	return nil
+}
+
+func parseData(page string) (Data, error) {
+	data := Data{}
+	// TODO: CHeck so values are not empty
+	valText := extractData(page, cardValueRegexp)
+	name := extractData(page, cardNameRegexp)
+	email := extractData(page, cardEmailRegexp)
+	cardNumber := extractData(page, cardNumberRegexp)
+	value, err := strconv.ParseFloat(strings.Replace(valText, ",", ".", -1), 64)
+	if err != nil {
+		return Data{}, ErrorInvalidBalance
+	}
+
+	data.FullName = name
+	data.Email = email
+	data.CardNumber = cardNumber
+	data.Balance = value
+	return data, nil
 }
 
 func extractData(input string, expression *regexp.Regexp) string {

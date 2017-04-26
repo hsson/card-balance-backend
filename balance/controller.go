@@ -28,7 +28,8 @@ type Data struct {
 func GetBalance(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	cardNumber := vars["number"]
-	data, err := getCardData(cardNumber)
+	scraper := new(scraper)
+	data, err := scraper.Scrape(cardNumber)
 	if err != nil {
 		// TODO: Proper error handling
 		log.Println(err)
