@@ -75,6 +75,9 @@ func (s *scraper) Scrape(number string) (Data, error) {
 
 	// Get the data from the logged in page
 	data, err := s.getData()
+	if err != nil {
+		return Data{}, err
+	}
 	return data, nil
 }
 

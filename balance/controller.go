@@ -6,8 +6,6 @@
 package balance
 
 import (
-	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -25,17 +23,13 @@ type Data struct {
 
 // GetBalance returns the card balance for the card with the
 // specified card number
-func GetBalance(w http.ResponseWriter, r *http.Request) {
+func GetBalance(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	cardNumber := vars["number"]
 	scraper := new(scraper)
 	data, err := scraper.Scrape(cardNumber)
 	if err != nil {
-		// TODO: Proper error handling
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
-	encoder := json.NewEncoder(w)
-	encoder.Encode(data)
+	return data, nil
 }

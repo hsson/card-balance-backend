@@ -5,12 +5,9 @@
 
 package menu
 
-import (
-	"fmt"
-	"net/http"
-)
+import "net/http"
 
 // Index gets the entire food menu
-func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Get the food menu")
+func Index(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	return "Get the food menu", nil
 }

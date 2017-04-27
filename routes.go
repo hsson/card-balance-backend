@@ -6,8 +6,6 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/hsson/card-balance-backend/balance"
 	"github.com/hsson/card-balance-backend/charge"
 	"github.com/hsson/card-balance-backend/menu"
@@ -17,7 +15,7 @@ type route struct {
 	Name        string
 	Method      string
 	Pattern     string
-	HandlerFunc http.HandlerFunc
+	HandlerFunc errorHandler
 }
 
 var routes = []route{

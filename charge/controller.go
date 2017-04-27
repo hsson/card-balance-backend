@@ -11,6 +11,7 @@ import "net/http"
 const chargingWebsiteURL = "https://kortladdning3.chalmerskonferens.se/"
 
 // Redirect redirects to the proper website for charging a card
-func Redirect(w http.ResponseWriter, r *http.Request) {
+func Redirect(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	http.Redirect(w, r, chargingWebsiteURL, http.StatusTemporaryRedirect)
+	return nil, nil
 }
