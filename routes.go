@@ -22,7 +22,7 @@ var routes = []route{
 	// Balance module
 	route{"GetBalance", "GET", "/balance/{number:[0-9]+}", balance.GetBalance},
 	// Food menu module
-	route{"IndexMenu", "GET", "/menu", menu.Index},
+	route{"IndexMenu", "GET", "/menu/{lang:(sv|en)}", menu.Index},
 	// Card charging redirect
 	route{"ChargeRedirect", "GET", "/charge", charge.Redirect},
 }
