@@ -8,10 +8,15 @@ package balance
 import (
 	"net/http"
 
+	"errors"
+
 	"github.com/gorilla/mux"
 )
 
 const allowedCardNumberLength = 16
+
+// ErrorInvalidCardNumber is sent when the card number is not 16 digits long
+var ErrorInvalidCardNumber = errors.New("Invalid card number")
 
 // Data represents the balance data available from the card website
 type Data struct {
@@ -26,6 +31,9 @@ type Data struct {
 func GetBalance(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	cardNumber := vars["number"]
+	if len(cardNumber) != allowedCardNumberLength {
+		return nil, ErrorInvalidCardNumber
+	}
 	scraper := new(scraper)
 	data, err := scraper.Scrape(cardNumber)
 	if err != nil {

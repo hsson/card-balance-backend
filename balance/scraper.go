@@ -20,7 +20,7 @@ import (
 
 var (
 	// ErrorBadPage indicates that the page is not available
-	ErrorBadPage = errors.New("Page not OK")
+	ErrorBadPage = errors.New("Website not available")
 	// ErrorNoFormToken means that a required form token is not available
 	ErrorNoFormToken = errors.New("A required form token is unavailable")
 	// ErrorNoSessionCookie means a session cookie could not be obtained
