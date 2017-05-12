@@ -22,8 +22,9 @@ type Menu struct {
 
 // Restaurant describes a restrarant and its dishes
 type Restaurant struct {
-	Name   string `json:"name"`
-	Dishes []Dish `json:"dishes"`
+	Name     string `json:"name"`
+	ImageURL string `json:"image_url"`
+	Dishes   []Dish `json:"dishes"`
 }
 
 // Dish represents a food dish
@@ -36,19 +37,19 @@ type Dish struct {
 func Index(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	lang := vars["lang"]
-	urls := getURLs(lang)
 	result := Menu{}
 	result.Menu = []Restaurant{}
 	result.Language = lang
 	parser := gofeed.NewParser()
-	for _, url := range urls {
-		feed, err := parser.ParseURL(url)
+	for _, rawRestaurant := range restaurantURLS {
+		feed, err := parser.ParseURL(rawRestaurant.getURL(lang))
 		if err != nil {
 			return nil, err
 		}
 		restaurant := Restaurant{}
 		restaurant.Name = tidyRestaurantTitle(feed.Title)
 		restaurant.Dishes = []Dish{}
+		restaurant.ImageURL = rawRestaurant.ImageURL
 		for _, item := range feed.Items {
 			dish := Dish{}
 			dish.Title = item.Title
