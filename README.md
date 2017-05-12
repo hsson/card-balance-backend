@@ -3,3 +3,83 @@
 # card-balance-backend
 
 The backend for the [Chalmers Card Balance](https://play.google.com/store/apps/details?id=se.creotec.chscardbalance2) application. It replaces the old closed-source implementation (which will become available when fully deprecated).
+
+## API Specification
+### ```HTTP GET /balance/<card number> ```
+Get information about a specified chalmers card. An example request could look like:
+```
+HTTP GET /balance/2222333344445555
+```
+If the request is successful, the response will look like:
+``` json
+{
+    "success": true,
+    "data": {
+        "card_number": "2222333344445555",
+        "full_name": "Emilia Emilsson",
+        "email": "emilia1337@example.com",
+        "balance": 69.42
+    },
+    "error": ""
+}
+```
+
+If the request was not successful, the response could look like:
+``` json
+{
+    "success": false,
+    "data": null,
+    "error": "Invalid card number"
+}
+```
+There are several different errors that can occur.
+
+### ```HTTP GET  /menu/<lang>```
+Get today's menu from restraurants on Chalmer's campuses. Make sure to specify which langugage to get the menu in. The following different language parameters are valid:
+- ```sv```: Swedish
+- ```en```: English
+
+An example request could look like:
+```
+HTTP GET /menu/en
+```
+If the request is successful, it could look like:
+``` json
+{
+    "success": true,
+    "data": {
+        "language": "en",
+        "menu": [
+            {
+                "name": "Kårrestaurangen",
+                "image_url": "",
+                "dishes": [
+                    {
+                        "title": "Classic Vegetarisk",
+                        "desc": "Some nice food"
+                    },
+                    {
+                        "title": "Classic Fisk",
+                        "desc": "Another nice food"
+                    }
+                ]
+            },
+            {
+                "name": "Ls Kitchen",
+                "image_url": "",
+                "dishes": [
+                    {
+                        "title": "Meat",
+                        "desc": "Food"
+                    }
+                ]
+            }
+        ]
+    },
+    "error": ""
+}
+```
+Note that there can be an arbitrary amount of restaurants returned, and each restaurant can have an arbitrary amount of dishes. It all depends on which day it is.
+
+### ```HTTP GET /charge```
+Use this endpoint to get redirected to the current website on which you can charge your Chalmers card.
