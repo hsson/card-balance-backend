@@ -47,6 +47,7 @@ func (fn errorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	res := response{}
 	jsonEnc := json.NewEncoder(w)
 	data, err := fn(w, r)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if err != nil {
 		log.Printf("Error: %v", err.Error())
 		res.Success = false
