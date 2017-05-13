@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/hsson/card-balance-backend/modules"
+	"github.com/hsson/card-balance-backend/backend/modules"
 	"golang.org/x/net/html"
 )
 

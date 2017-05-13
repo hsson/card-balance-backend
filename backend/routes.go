@@ -6,9 +6,9 @@
 package backend
 
 import (
-	"github.com/hsson/card-balance-backend/modules/balance"
-	"github.com/hsson/card-balance-backend/modules/charge"
-	"github.com/hsson/card-balance-backend/modules/menu"
+	"github.com/hsson/card-balance-backend/backend/modules/balance"
+	"github.com/hsson/card-balance-backend/backend/modules/charge"
+	"github.com/hsson/card-balance-backend/backend/modules/menu"
 )
 
 type route struct {

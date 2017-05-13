@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/hsson/card-balance-backend/modules"
+	"github.com/hsson/card-balance-backend/backend/modules"
 	"github.com/mmcdole/gofeed"
 )
 
