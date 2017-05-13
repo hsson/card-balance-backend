@@ -6,7 +6,7 @@
 The backend for the [Chalmers Card Balance](https://play.google.com/store/apps/details?id=se.creotec.chscardbalance2) application. It replaces the old closed-source implementation (which will become available when fully deprecated).
 
 ## Building
-This implementation both supports Google AppEngine and native standalone runtimes. 
+This implementation both supports Google AppEngine and native standalone runtimes. The API is implemented for Go v1.7+, with some fixes for Google AppEngine (which is currently running Go v1.6).
 
 ### Natively
 To run the backend natively, simply run:
