@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/hsson/card-balance-backend/modules"
 	"github.com/mmcdole/gofeed"
 )
 
@@ -41,6 +42,7 @@ func Index(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	result.Menu = []Restaurant{}
 	result.Language = lang
 	parser := gofeed.NewParser()
+	parser.Client = modules.GetHTTPClient(r)
 	for _, rawRestaurant := range restaurantURLS {
 		feed, err := parser.ParseURL(rawRestaurant.getURL(lang))
 		if err != nil {

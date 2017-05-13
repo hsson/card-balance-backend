@@ -11,6 +11,7 @@ import (
 	"errors"
 
 	"github.com/gorilla/mux"
+	"github.com/hsson/card-balance-backend/modules"
 )
 
 const allowedCardNumberLength = 16
@@ -35,6 +36,9 @@ func GetBalance(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 		return nil, ErrorInvalidCardNumber
 	}
 	scraper := new(scraper)
+	// Initialize scraper for new scrape request
+	scraper.init()
+	scraper.client = modules.GetHTTPClient(r)
 	data, err := scraper.Scrape(cardNumber)
 	if err != nil {
 		return nil, err

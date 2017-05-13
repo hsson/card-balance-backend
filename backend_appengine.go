@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-// +build !appengine
+// +build appengine
 
 package backend
 
@@ -13,5 +13,4 @@ import "net/http"
 func Run() {
 	r := newRouter()
 	http.Handle("/", r)
-	http.ListenAndServe(":8080", nil)
 }

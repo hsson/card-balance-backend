@@ -12,9 +12,9 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/hsson/card-balance-backend/modules"
 	"golang.org/x/net/html"
 )
 
@@ -47,14 +47,10 @@ func (s *scraper) init() {
 	s.viewStateGen = ""
 	s.eventValidation = ""
 	s.headers = nil
-	s.client = &http.Client{
-		Timeout: time.Second * 10,
-	}
+	s.client = nil
 }
 
 func (s *scraper) Scrape(number string) (Data, error) {
-	// Initialize scraper for new scrape request
-	s.init()
 	s.cardNumber = number
 
 	// Get tokens from login form
@@ -89,11 +85,10 @@ func (s *scraper) login() error {
 		return err
 	}
 	// Make sure to not follow any redirects
-	s.client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
-	}
+	s.client.CheckRedirect = modules.RedirectFunc
+
 	response, err := s.client.Do(req)
-	if err != nil {
+	if code := response.StatusCode; err != nil && code != 301 && code != 302 {
 		return err
 	}
 	// Extract the session cookie from the response
