@@ -4,6 +4,32 @@
 
 The backend for the [Chalmers Card Balance](https://play.google.com/store/apps/details?id=se.creotec.chscardbalance2) application. It replaces the old closed-source implementation (which will become available when fully deprecated).
 
+## Building
+This implementation both supports Google AppEngine and native standalone runtimes. 
+
+### Natively
+To run the backend natively, simply run:
+```
+> go run main.go
+```
+And to build it:
+```
+> go build 
+```
+
+### Google AppEngine
+To use Google AppEngine, first make sure you have the AppEngine SDK correctly installed. To start a test server, run:
+```
+> cd appengine
+> dev_appserver.py app.yaml
+```
+And to deploy it to GoogleAppEngine:
+```
+> cd appengine
+> gcloud app deploy -v <version> app.yaml
+```
+The backend is then available at `https://<version>-dot-<project-id>.appspot.com`.
+
 ## API Specification
 ### ```HTTP GET /balance/<card number> ```
 Get information about a specified chalmers card. An example request could look like:
