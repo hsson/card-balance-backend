@@ -3,12 +3,11 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-package main
+package backend
 
 import "net/http"
 
-func main() {
+func Run() {
 	r := newRouter()
 	http.Handle("/", r)
-	http.ListenAndServe(":8080", nil)
 }
