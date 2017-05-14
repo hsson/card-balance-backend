@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/hsson/card-balance-backend.svg?branch=master)](https://travis-ci.org/hsson/card-balance-backend)
-[![Go Report Card](https://goreportcard.com/badge/github.com/hsson/card-balance-backend)](https://goreportcard.com/report/github.com/hsson/card-balance-backend)
+[![Go Report Card](https://goreportcard.com/badge/hsson/card-balance-backend)](https://goreportcard.com/report/hsson/card-balance-backend)
 
 # card-balance-backend
 
