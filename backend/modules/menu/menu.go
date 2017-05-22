@@ -51,13 +51,13 @@ func Index(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	result.Language = lang
 	parser := gofeed.NewParser()
 	parser.Client = modules.GetHTTPClient(r)
-	for _, rawRestaurant := range restaurantURLS {
-		feed, err := parser.ParseURL(rawRestaurant.getURL(lang))
+	for _, rawRestaurant := range config.Restaurants {
+		feed, err := parser.ParseURL(rawRestaurant.MenuURL + lang)
 		if err != nil {
 			return nil, err
 		}
 		restaurant := Restaurant{}
-		restaurant.Name = tidyRestaurantTitle(feed.Title)
+		restaurant.Name = rawRestaurant.Name
 		restaurant.Dishes = []Dish{}
 		restaurant.ImageURL = rawRestaurant.ImageURL
 		for _, item := range feed.Items {
@@ -87,8 +87,4 @@ func tidyDishDescription(menu string) string {
 		res = strings.Replace(res, `"`, "", -1)
 	}
 	return strings.TrimSpace(res)
-}
-
-func tidyRestaurantTitle(title string) string {
-	return strings.TrimLeft(title, "Meny ")
 }
