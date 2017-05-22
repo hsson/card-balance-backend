@@ -54,7 +54,7 @@ func (s *scraper) Scrape(number string) (Data, error) {
 	s.cardNumber = number
 
 	// Get tokens from login form
-	page, err := s.getWebContent(baseURL + "/" + loginPage)
+	page, err := s.getWebContent(config.CardSiteURL + loginPage)
 	if err != nil {
 		return Data{}, err
 	}
@@ -103,7 +103,7 @@ func (s *scraper) login() error {
 }
 
 func (s *scraper) getData() (Data, error) {
-	page, err := s.getWebContent(baseURL + "/" + infoPage)
+	page, err := s.getWebContent(config.CardSiteURL + infoPage)
 	if err != nil {
 		return Data{}, err
 	}
@@ -151,7 +151,7 @@ func (s *scraper) newLoginRequest() (*http.Request, error) {
 	loginForm.Add(mobileKey, mobileValue)
 
 	// Create an HTTP request with the login parameters
-	req, err := http.NewRequest(http.MethodPost, baseURL+"/"+loginPage, strings.NewReader(loginForm.Encode()))
+	req, err := http.NewRequest(http.MethodPost, config.CardSiteURL+loginPage, strings.NewReader(loginForm.Encode()))
 	if err != nil {
 		return nil, err
 	}

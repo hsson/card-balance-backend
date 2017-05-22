@@ -6,6 +6,8 @@ import (
 
 	"net/url"
 
+	"strings"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -61,6 +63,10 @@ func TestLoadRealConfig(t *testing.T) {
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
 		t.Error("Error when parsing config")
+	}
+
+	if !strings.HasSuffix(config.CardSiteURL, "/") {
+		t.Error("The card site URL should end with a '/'")
 	}
 
 	// Test that all URLs are valid. Image URL and website URL
