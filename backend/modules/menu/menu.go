@@ -24,9 +24,11 @@ type Menu struct {
 
 // Restaurant describes a restrarant and its dishes
 type Restaurant struct {
-	Name     string `json:"name"`
-	ImageURL string `json:"image_url"`
-	Dishes   []Dish `json:"dishes"`
+	Name       string  `json:"name"`
+	ImageURL   string  `json:"image_url"`
+	WebsiteURL string  `json:"website_url"`
+	Rating     float32 `json:"rating"`
+	Dishes     []Dish  `json:"dishes"`
 }
 
 // Dish represents a food dish
@@ -60,6 +62,8 @@ func Index(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 		restaurant.Name = rawRestaurant.Name
 		restaurant.Dishes = []Dish{}
 		restaurant.ImageURL = rawRestaurant.ImageURL
+		restaurant.WebsiteURL = rawRestaurant.WebsiteURL
+		restaurant.Rating = rawRestaurant.Rating
 		for _, item := range feed.Items {
 			dish := Dish{}
 			dish.Title = item.Title
