@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/hsson/card-balance-backend/backend/modules"
+	backendConfig "github.com/hsson/card-balance-backend/config"
 	"github.com/mmcdole/gofeed"
 )
 
@@ -23,15 +24,24 @@ type Menu struct {
 
 // Restaurant describes a restrarant and its dishes
 type Restaurant struct {
-	Name     string `json:"name"`
-	ImageURL string `json:"image_url"`
-	Dishes   []Dish `json:"dishes"`
+	Name       string  `json:"name"`
+	ImageURL   string  `json:"image_url"`
+	WebsiteURL string  `json:"website_url"`
+	Rating     float32 `json:"rating"`
+	Dishes     []Dish  `json:"dishes"`
 }
 
 // Dish represents a food dish
 type Dish struct {
 	Title string `json:"title"`
 	Desc  string `json:"desc"`
+}
+
+var config backendConfig.Config
+
+// Init initializes the module with specified config
+func Init(newConfig backendConfig.Config) {
+	config = newConfig
 }
 
 // Index gets the entire food menu
@@ -43,15 +53,17 @@ func Index(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	result.Language = lang
 	parser := gofeed.NewParser()
 	parser.Client = modules.GetHTTPClient(r)
-	for _, rawRestaurant := range restaurantURLS {
-		feed, err := parser.ParseURL(rawRestaurant.getURL(lang))
+	for _, rawRestaurant := range config.Restaurants {
+		feed, err := parser.ParseURL(rawRestaurant.MenuURL + lang)
 		if err != nil {
 			return nil, err
 		}
 		restaurant := Restaurant{}
-		restaurant.Name = tidyRestaurantTitle(feed.Title)
+		restaurant.Name = rawRestaurant.Name
 		restaurant.Dishes = []Dish{}
 		restaurant.ImageURL = rawRestaurant.ImageURL
+		restaurant.WebsiteURL = rawRestaurant.WebsiteURL
+		restaurant.Rating = rawRestaurant.Rating
 		for _, item := range feed.Items {
 			dish := Dish{}
 			dish.Title = item.Title
@@ -79,8 +91,4 @@ func tidyDishDescription(menu string) string {
 		res = strings.Replace(res, `"`, "", -1)
 	}
 	return strings.TrimSpace(res)
-}
-
-func tidyRestaurantTitle(title string) string {
-	return strings.TrimLeft(title, "Meny ")
 }

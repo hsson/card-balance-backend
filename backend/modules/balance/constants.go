@@ -7,7 +7,6 @@ package balance
 
 const (
 	// Website info
-	baseURL   = "https://kortladdning3.chalmerskonferens.se"
 	loginPage = "Default.aspx"
 	infoPage  = "CardLoad_Order.aspx"
 

@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/hsson/card-balance-backend/backend/modules"
+	backendConfig "github.com/hsson/card-balance-backend/config"
 )
 
 const allowedCardNumberLength = 16
@@ -19,12 +20,19 @@ const allowedCardNumberLength = 16
 // ErrorInvalidCardNumber is sent when the card number is not 16 digits long
 var ErrorInvalidCardNumber = errors.New("Invalid card number")
 
+var config backendConfig.Config
+
 // Data represents the balance data available from the card website
 type Data struct {
 	CardNumber string  `json:"card_number"`
 	FullName   string  `json:"full_name"`
 	Email      string  `json:"email"`
 	Balance    float64 `json:"balance"`
+}
+
+// Init initializes the module with given config
+func Init(newConfig backendConfig.Config) {
+	config = newConfig
 }
 
 // GetBalance returns the card balance for the card with the
