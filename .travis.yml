@@ -1,4 +1,7 @@
 language: go
 
+before_script:
+  - mv config/config.yaml.example config/config.yaml
+
 go:
   - master
