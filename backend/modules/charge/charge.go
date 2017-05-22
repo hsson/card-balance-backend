@@ -5,13 +5,21 @@
 
 package charge
 
-import "net/http"
+import (
+	"net/http"
 
-// TODO: Move to config file
-const chargingWebsiteURL = "https://kortladdning3.chalmerskonferens.se/"
+	backendConfig "github.com/hsson/card-balance-backend/config"
+)
+
+var config backendConfig.Config
+
+// Init intializes the module with given config
+func Init(newConfig backendConfig.Config) {
+	config = newConfig
+}
 
 // Redirect redirects to the proper website for charging a card
 func Redirect(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	http.Redirect(w, r, chargingWebsiteURL, http.StatusTemporaryRedirect)
+	http.Redirect(w, r, config.CardSiteURL, http.StatusTemporaryRedirect)
 	return nil, nil
 }

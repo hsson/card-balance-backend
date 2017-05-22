@@ -12,6 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/hsson/card-balance-backend/backend/modules"
+	backendConfig "github.com/hsson/card-balance-backend/config"
 	"github.com/mmcdole/gofeed"
 )
 
@@ -32,6 +33,13 @@ type Restaurant struct {
 type Dish struct {
 	Title string `json:"title"`
 	Desc  string `json:"desc"`
+}
+
+var config backendConfig.Config
+
+// Init initializes the module with specified config
+func Init(newConfig backendConfig.Config) {
+	config = newConfig
 }
 
 // Index gets the entire food menu
