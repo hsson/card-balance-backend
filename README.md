@@ -5,6 +5,9 @@
 
 The backend for the [Chalmers Card Balance](https://play.google.com/store/apps/details?id=se.creotec.chscardbalance2) application. It replaces the old closed-source implementation (which will become available when fully deprecated).
 
+## Configuring
+To configure the service, see the config example in the config folder. The config file enables easy adding of restaurant information. To use the config, rename the example from `config.yaml.example` to `config.yaml`. In order to use the configuration in Google AppEngine, it must be moved/copied to the appengine directory.
+
 ## Building
 This implementation both supports Google AppEngine and native standalone runtimes. The API is implemented for Go v1.7+, with some fixes for Google AppEngine (which is currently running Go v1.6).
 

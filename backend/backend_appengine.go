@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	configFile = "../config/config.yaml"
+	configFile = "./config.yaml"
 )
 
 // Run starts the API for appengine
