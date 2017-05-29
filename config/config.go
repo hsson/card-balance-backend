@@ -11,12 +11,13 @@ import (
 type Config struct {
 	CardSiteURL string `yaml:"card_site_url"`
 	Restaurants []struct {
-		Name       string  `yaml:"name"`
-		MenuURL    string  `yaml:"menu_url"`
-		ImageURL   string  `yaml:"image"`
-		WebsiteURL string  `yaml:"website"`
-		Rating     float32 `yaml:"rating"`
-		OpenHours  []struct {
+		Name         string  `yaml:"name"`
+		MenuURL      string  `yaml:"menu_url"`
+		ImageURL     string  `yaml:"image"`
+		WebsiteURL   string  `yaml:"website"`
+		Rating       float32 `yaml:"rating"`
+		AveragePrice int     `yaml:"avg_price"`
+		OpenHours    []struct {
 			DayOfWeek int `yaml:"day_of_week"`
 			StartTime int `yaml:"start_hour"`
 			EndTime   int `yaml:"end_hour"`

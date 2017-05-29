@@ -7,6 +7,7 @@ restaurants:
     image:
     website:
     rating: 4.2
+    avg_price: 65
     open_hours:
       - day_of_week: 2 # 2 is monday, 1 is sunday etc. 
         start_hour: 1100
@@ -29,21 +30,25 @@ restaurants:
     image:
     website:
     rating: 4.0
+    avg_price: 65
 
   - name: Linsen
     menu_url: http://intern.chalmerskonferens.se/view/restaurant/linsen/RSS%20Feed.rss?today=true&lang=
     image:  
     website:
     rating: 4.4
+    avg_price: 65
 
   - name: Express
     menu_url: http://intern.chalmerskonferens.se/view/restaurant/express/V%C3%A4nster.rss?today=true&locale=
     image:  
     website:
     rating: 3.0
+    avg_price: 65
 
   - name: Hyllan
     menu_url: http://intern.chalmerskonferens.se/view/restaurant/hyllan/RSS%20Feed.rss?today=true&locale=
     image:
     website:
     rating: 4.3
+    avg_price: 65

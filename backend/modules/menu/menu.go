@@ -22,12 +22,13 @@ type Menu struct {
 
 // Restaurant describes a restrarant and its dishes
 type Restaurant struct {
-	Name       string     `json:"name"`
-	ImageURL   string     `json:"image_url"`
-	WebsiteURL string     `json:"website_url"`
-	Rating     float32    `json:"rating"`
-	Dishes     []Dish     `json:"dishes"`
-	OpenHours  []OpenHour `json:"open_hours"`
+	Name         string     `json:"name"`
+	ImageURL     string     `json:"image_url"`
+	WebsiteURL   string     `json:"website_url"`
+	Rating       float32    `json:"rating"`
+	AveragePrice int        `json:"avg_price"`
+	Dishes       []Dish     `json:"dishes"`
+	OpenHours    []OpenHour `json:"open_hours"`
 }
 
 // Dish represents a food dish
@@ -103,6 +104,7 @@ func Index(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 		restaurant.ImageURL = rawRestaurant.ImageURL
 		restaurant.WebsiteURL = rawRestaurant.WebsiteURL
 		restaurant.Rating = rawRestaurant.Rating
+<<<<<<< HEAD
 		for _, category := range jsonResponse.RecipeCategories {
 			for _, recipe := range category.Recipes {
 				dish := Dish{}
@@ -123,6 +125,9 @@ func Index(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 				restaurant.Dishes = append(restaurant.Dishes, dish)
 			}
 		}
+=======
+		restaurant.AveragePrice = rawRestaurant.AveragePrice
+>>>>>>> Adds average price
 		openHours := []OpenHour{}
 		for _, oh := range rawRestaurant.OpenHours {
 			openHour := OpenHour{}
