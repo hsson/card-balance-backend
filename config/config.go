@@ -17,6 +17,7 @@ type Config struct {
 		WebsiteURL   string  `yaml:"website"`
 		Rating       float32 `yaml:"rating"`
 		AveragePrice int     `yaml:"avg_price"`
+		Campus       string  `yaml:"campus"`
 		OpenHours    []struct {
 			DayOfWeek int `yaml:"day_of_week"`
 			StartTime int `yaml:"start_hour"`
