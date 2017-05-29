@@ -16,6 +16,11 @@ type Config struct {
 		ImageURL   string  `yaml:"image"`
 		WebsiteURL string  `yaml:"website"`
 		Rating     float32 `yaml:"rating"`
+		OpenHours  []struct {
+			DayOfWeek int `yaml:"day_of_week"`
+			StartTime int `yaml:"start_hour"`
+			EndTime   int `yaml:"end_hour"`
+		} `yaml:"open_hours"`
 	} `yaml:"restaurants"`
 }
 

@@ -22,11 +22,12 @@ type Menu struct {
 
 // Restaurant describes a restrarant and its dishes
 type Restaurant struct {
-	Name       string  `json:"name"`
-	ImageURL   string  `json:"image_url"`
-	WebsiteURL string  `json:"website_url"`
-	Rating     float32 `json:"rating"`
-	Dishes     []Dish  `json:"dishes"`
+	Name       string     `json:"name"`
+	ImageURL   string     `json:"image_url"`
+	WebsiteURL string     `json:"website_url"`
+	Rating     float32    `json:"rating"`
+	Dishes     []Dish     `json:"dishes"`
+	OpenHours  []OpenHour `json:"open_hours"`
 }
 
 // Dish represents a food dish
@@ -61,6 +62,13 @@ type jsonRestaurant struct {
 const (
 	languageSwedish = "sv"
 )
+
+// OpenHour represents the open hour of a restaurant
+type OpenHour struct {
+	DayOfWeek int `json:"day_of_week"`
+	StartTime int `json:"start_hour"`
+	EndTime   int `json:"end_hour"`
+}
 
 var config backendConfig.Config
 
@@ -115,6 +123,15 @@ func Index(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 				restaurant.Dishes = append(restaurant.Dishes, dish)
 			}
 		}
+		openHours := []OpenHour{}
+		for _, oh := range rawRestaurant.OpenHours {
+			openHour := OpenHour{}
+			openHour.DayOfWeek = oh.DayOfWeek
+			openHour.StartTime = oh.StartTime
+			openHour.EndTime = oh.EndTime
+			openHours = append(openHours, openHour)
+		}
+		restaurant.OpenHours = openHours
 		result.Menu = append(result.Menu, restaurant)
 	}
 

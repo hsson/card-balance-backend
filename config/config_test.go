@@ -21,6 +21,10 @@ restaurants:
     image:
     website:
     rating: 3.0
+    open_hours:
+      - day_of_week: 2
+        start_hour: 800
+        end_hour: 1330
 
   - name: L's Kitchen
     menu_url: https://example.com/lskitchen
