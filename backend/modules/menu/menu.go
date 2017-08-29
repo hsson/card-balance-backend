@@ -6,14 +6,12 @@
 package menu
 
 import (
+	"encoding/json"
 	"net/http"
-
-	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/hsson/card-balance-backend/backend/modules"
 	backendConfig "github.com/hsson/card-balance-backend/config"
-	"github.com/mmcdole/gofeed"
 )
 
 // Menu describes a set of restraurants
@@ -37,6 +35,33 @@ type Dish struct {
 	Desc  string `json:"desc"`
 }
 
+type jsonRestaurant struct {
+	MenuDate         string `json:"menuDate"`
+	RecipeCategories []struct {
+		Name        string `json:"name"`
+		NameEnglish string `json:"nameEnglish"`
+		ID          int    `json:"id"`
+		Recipes     []struct {
+			DisplayNames []struct {
+				TypeID      int    `json:"typeID"`
+				DisplayName string `json:"displayName"`
+			} `json:"displayNames"`
+			CO2E      string `json:"cO2e"`
+			CO2EURL   string `json:"cO2eURL"`
+			Allergens []struct {
+				ID             int         `json:"id"`
+				ImageURLBright interface{} `json:"imageURLBright"`
+				ImageURLDark   interface{} `json:"imageURLDark"`
+			} `json:"allergens"`
+			Price float64 `json:"price"`
+		} `json:"recipes"`
+	} `json:"recipeCategories"`
+}
+
+const (
+	languageSwedish = "sv"
+)
+
 var config backendConfig.Config
 
 // Init initializes the module with specified config
@@ -44,17 +69,23 @@ func Init(newConfig backendConfig.Config) {
 	config = newConfig
 }
 
-// Index gets the entire food menu
+// Index gets the entire food menu using the JSON endpoint
 func Index(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	lang := vars["lang"]
 	result := Menu{}
 	result.Menu = []Restaurant{}
 	result.Language = lang
-	parser := gofeed.NewParser()
-	parser.Client = modules.GetHTTPClient(r)
+
+	httpClient := modules.GetHTTPClient(r)
 	for _, rawRestaurant := range config.Restaurants {
-		feed, err := parser.ParseURL(rawRestaurant.MenuURL + lang)
+		data, err := httpClient.Get(rawRestaurant.MenuURL)
+		if err != nil {
+			return nil, err
+		}
+		decoder := json.NewDecoder(data.Body)
+		jsonResponse := jsonRestaurant{}
+		err = decoder.Decode(&jsonResponse)
 		if err != nil {
 			return nil, err
 		}
@@ -64,31 +95,28 @@ func Index(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 		restaurant.ImageURL = rawRestaurant.ImageURL
 		restaurant.WebsiteURL = rawRestaurant.WebsiteURL
 		restaurant.Rating = rawRestaurant.Rating
-		for _, item := range feed.Items {
-			dish := Dish{}
-			dish.Title = item.Title
-			dish.Desc = tidyDishDescription(item.Description)
-			restaurant.Dishes = append(restaurant.Dishes, dish)
+		for _, category := range jsonResponse.RecipeCategories {
+			for _, recipe := range category.Recipes {
+				dish := Dish{}
+				if lang == languageSwedish {
+					dish.Title = category.Name
+				} else {
+					dish.Title = category.NameEnglish
+				}
+				if len(recipe.DisplayNames) == 1 {
+					dish.Desc = recipe.DisplayNames[0].DisplayName
+				} else {
+					if lang == languageSwedish {
+						dish.Desc = recipe.DisplayNames[0].DisplayName
+					} else {
+						dish.Desc = recipe.DisplayNames[1].DisplayName
+					}
+				}
+				restaurant.Dishes = append(restaurant.Dishes, dish)
+			}
 		}
 		result.Menu = append(result.Menu, restaurant)
 	}
 
 	return result, nil
-}
-
-func tidyDishDescription(menu string) string {
-	res := menu
-	if strings.Contains(menu, "@") {
-		tmp := strings.Split(menu, "@")
-		if len(tmp) > 0 {
-			res = tmp[0]
-		} else {
-			res = ""
-		}
-	}
-
-	if strings.Contains(res, `"`) {
-		res = strings.Replace(res, `"`, "", -1)
-	}
-	return strings.TrimSpace(res)
 }
