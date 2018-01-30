@@ -7,6 +7,8 @@ package menu
 
 import (
 	"encoding/json"
+	"io"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -89,15 +91,23 @@ func Index(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 
 	httpClient := modules.GetHTTPClient(r)
 	for _, rawRestaurant := range config.Restaurants {
+		log.Printf("Getting menu from: %s\n", rawRestaurant.MenuURL)
 		data, err := httpClient.Get(rawRestaurant.MenuURL)
 		if err != nil {
+			log.Printf("Error when getting menu: %s\n", err)
 			return nil, err
 		}
 		decoder := json.NewDecoder(data.Body)
 		jsonResponse := jsonRestaurant{}
 		err = decoder.Decode(&jsonResponse)
 		if err != nil {
-			return nil, err
+			log.Printf("Could not decode json: %s\n", err)
+			if err == io.EOF {
+				log.Printf("Something wrong with chalmers endpoint, skipping...")
+				continue
+			} else {
+				return nil, err
+			}
 		}
 		restaurant := Restaurant{}
 		restaurant.Name = rawRestaurant.Name
