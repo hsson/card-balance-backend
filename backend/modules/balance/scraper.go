@@ -7,6 +7,7 @@ package balance
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -14,7 +15,6 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/hsson/card-balance-backend/backend/modules"
 	"golang.org/x/net/html"
 )
 
@@ -50,7 +50,7 @@ func (s *scraper) init() {
 	s.client = nil
 }
 
-func (s *scraper) Scrape(number string) (Data, error) {
+func (s *scraper) Scrape(number string, userInfo string) (Data, error) {
 	s.cardNumber = number
 
 	// Get tokens from login form
@@ -64,7 +64,7 @@ func (s *scraper) Scrape(number string) (Data, error) {
 	}
 
 	// Perform the login
-	err = s.login()
+	err = s.login(userInfo)
 	if err != nil {
 		return Data{}, err
 	}
@@ -77,15 +77,13 @@ func (s *scraper) Scrape(number string) (Data, error) {
 	return data, nil
 }
 
-func (s *scraper) login() error {
+func (s *scraper) login(userInfo string) error {
 	// Prepare a request with correct headers and login
 	// form values
 	req, err := s.newLoginRequest()
 	if err != nil {
 		return err
 	}
-	// Make sure to not follow any redirects
-	s.client.CheckRedirect = modules.RedirectFunc
 
 	response, err := s.client.Do(req)
 	if code := response.StatusCode; err != nil && code != 301 && code != 302 {
@@ -97,6 +95,11 @@ func (s *scraper) login() error {
 		return ErrorNoSessionCookie
 	}
 	s.headers = make(map[string]string)
+
+	// Set userinfo if present
+	if userInfo != "" {
+		cookie = fmt.Sprintf("%s; userInfo=%s", cookie, userInfo)
+	}
 	s.headers[headerCookie] = cookie
 	s.headers[headerAcceptCharset] = headerAcceptCharsetValue
 	return nil
@@ -128,10 +131,12 @@ func (s *scraper) getWebContent(url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	if response.StatusCode != http.StatusOK {
 		return "", ErrorBadPage
 	}
 	body, err := ioutil.ReadAll(response.Body)
+
 	defer response.Body.Close()
 	if err != nil {
 		return "", err

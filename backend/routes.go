@@ -21,6 +21,8 @@ type route struct {
 var routes = []route{
 	// Balance module
 	route{"GetBalance", "GET", "/balance/{number:[0-9]+}", balance.GetBalance},
+	// Balance V2
+	route{"GetBalanceV2", "GET", "/balance/v2/{number:[0-9]+}/{userInfo}", balance.GetBalanceV2},
 	// Food menu module
 	route{"IndexMenu", "GET", "/menu/{lang:(?:sv|en)}", menu.Index},
 	// Card charging redirect

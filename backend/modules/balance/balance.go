@@ -47,7 +47,7 @@ func GetBalance(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	// Initialize scraper for new scrape request
 	scraper.init()
 	scraper.client = modules.GetHTTPClient(r)
-	data, err := scraper.Scrape(cardNumber)
+	data, err := scraper.Scrape(cardNumber, "")
 	if err != nil {
 		return nil, err
 	}
